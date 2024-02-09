@@ -1,5 +1,7 @@
-import { describe } from '@jest/globals';
+import { describe, expect } from '@jest/globals';
+import bcrypt from 'bcryptjs';
 import AuthService from '../../services/authService';
+import Usuario from '../../models/usuario';
 
 const authService = new AuthService();
 /*
@@ -23,5 +25,21 @@ describe('Testando a authService.cadastrarUsuario', () => {
 
     // assert
     await expect(usuarioSalvo).rejects.toThrowError('A senha de usuário é obrigatório!');
+  });
+
+  it('A senha do usuario deve ser criptografada qaundo for salva', async () => {
+    const data = {
+      nome: 'Andre',
+      email: 'michels@gmail.com',
+      senha: 'senha123',
+    };
+
+    const resultado = await authService.cadastrarUsuario(data);
+
+    const senhasIguais = await bcrypt.compare('senha123', resultado.content.senha);
+
+    expect(senhasIguais).toStrictEqual(true);
+
+    await Usuario.excluir(resultado.content.id);
   });
 });
