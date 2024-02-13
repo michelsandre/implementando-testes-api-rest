@@ -54,6 +54,12 @@ class AuthService {
       data.senha = await bcryptjs.hash(data.senha, 8);
 
       const usuario = new Usuario(data);
+      const existeEmail = await Usuario.pegarPeloEmail(data.email);
+
+      if (existeEmail) {
+        throw new Error('O email já está cadastrado!');
+      }
+
       const resposta = await usuario.salvar(usuario);
       return { message: 'usuario criado', content: resposta };
     } catch (err) {

@@ -1,4 +1,4 @@
-import { describe, expect } from '@jest/globals';
+import { describe, expect, it } from '@jest/globals';
 import bcrypt from 'bcryptjs';
 import AuthService from '../../services/authService';
 import Usuario from '../../models/usuario';
@@ -39,6 +39,43 @@ describe('Testando a authService.cadastrarUsuario', () => {
     const senhasIguais = await bcrypt.compare('senha123', resultado.content.senha);
 
     expect(senhasIguais).toStrictEqual(true);
+
+    await Usuario.excluir(resultado.content.id);
+  });
+
+  it('Não pode ser cadastrado um usuário com e-mail duplicado', async () => {
+    const usuarioMock = {
+      nome: 'Andre',
+      email: 'raphael@teste.com.br',
+      senha: '123456',
+    };
+    const usuarioSave = authService.cadastrarUsuario(usuarioMock);
+    await expect(usuarioSave).rejects.toThrowError('O email já está cadastrado!');
+  });
+
+  it('Ao cadastrar um usuário deve ser retornado uma mensagem informando que o usuário foi cadastrado', async () => {
+    const data = {
+      nome: 'Senhor das Trevas',
+      email: 'trevas@gmail.com',
+      senha: '123456',
+    };
+
+    const resultado = await authService.cadastrarUsuario(data);
+    expect(resultado.message).toEqual('usuario criado');
+
+    await Usuario.excluir(resultado.content.id);
+  });
+
+  it('Ao cadastrar um usuário, validar o retorno das informações do usuário', async () => {
+    const data = {
+      nome: 'John Doe',
+      email: 'john@doe.com',
+      senha: '123supersenha',
+    };
+
+    const resultado = await authService.cadastrarUsuario(data);
+
+    expect(resultado.content).toMatchObject(data);
 
     await Usuario.excluir(resultado.content.id);
   });
