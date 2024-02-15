@@ -43,7 +43,11 @@ class AluguelLivroService {
       if (resposta.id) {
         const usuario = await Usuario.pegarPeloId(usuarioId);
         const livro = await Livro.pegarPeloId(aluguelLivro.livro_id);
-        await nodeMailer(usuario.email, 'Aluguel de Livro', `Olá, ${usuario.nome}, você alugou o livro ${livro.titulo} por ${body.diasAlugados}.`);
+        await nodeMailer(
+          usuario.email,
+          'Aluguel de Livro',
+          `Olá, ${usuario.nome}, você alugou o livro ${livro.titulo} por ${body.diasAlugados}.`
+        );
       }
 
       return { message: 'Registro de Aluguel de Livro criado', content: resposta };
@@ -73,7 +77,11 @@ class AluguelLivroService {
       if (resposta.id) {
         const usuario = await Usuario.pegarPeloId(usuarioId);
         const livro = await Livro.pegarPeloId(aluguelLivro.livro_id);
-        await nodeMailer(usuario.email, 'Devolução de Livro', `Olá, ${usuario.nome}, você devolveu o livro ${livro.titulo}.`);
+        await nodeMailer(
+          usuario.email,
+          'Devolução de Livro',
+          `Olá, ${usuario.nome}, você devolveu o livro ${livro.titulo}.`
+        );
       }
 
       return { message: 'O Livro foi devolvido com sucesso.', content: resposta };
@@ -89,6 +97,15 @@ class AluguelLivroService {
     } catch (err) {
       throw new Error(err.message);
     }
+  }
+
+  async calcularDataDevolucao(dataAlugado, numeriDiasAlugado) {
+    if (numeriDiasAlugado < 1) {
+      throw new Error('Numero de dias alugados tem que ser maior que zero');
+    }
+    const dataDevolucao = new Date(dataAlugado.setDate(dataAlugado.getDate()));
+    dataDevolucao.setDate(dataDevolucao.getDate() + numeriDiasAlugado);
+    return dataDevolucao;
   }
 }
 
